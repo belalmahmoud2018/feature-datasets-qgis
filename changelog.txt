@@ -1,3 +1,20 @@
+0.3.0
+- Edit Dataset: rename, change CRS, description; optional reprojection of the dataset's layers (backup first).
+- Delete Dataset: remove the dataset, optionally with its layers.
+- File Geodatabase: same "Create Dataset" window as the other formats (new datasets are created
+  in the geodatabase together with their first layer).
+- Fixed the "Permission denied" error when creating a File Geodatabase.
+- Errors from GDAL are now shown as readable messages.
+
+0.2.0
+- Renamed to Feature Datasets Manager.
+- Format chooser: GeoPackage, SpatiaLite, File Geodatabase.
+- File Geodatabase uses real feature datasets (GDAL 3.6+).
+- One main window for all actions; toolbar icon.
+
+0.1.3
+- Added plugin icon (plugin manager and menu).
+
 0.1.2
 - Marked as stable (no longer experimental).
 

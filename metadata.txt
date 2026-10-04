@@ -1,15 +1,16 @@
 [general]
-name=Feature Datasets for GeoPackage
+name=Feature Datasets Manager
 qgisMinimumVersion=3.22
 supportsQt6=True
-description=Group GeoPackage layers into Feature Datasets that share one CRS, set once.
-about=Adds a Feature Dataset concept (as in Esri File Geodatabases) to GeoPackage files. A dataset stores its CRS once; new layers created inside it inherit that CRS automatically, existing layers are checked against it. The grouping is stored in two small helper tables inside the .gpkg, which other software ignores.
-version=0.1.2
+description=Feature Datasets for GeoPackage, SpatiaLite and File Geodatabase: set the CRS once per dataset.
+about=Adds a Feature Dataset workflow to GeoPackage, SpatiaLite and File Geodatabase. Choose the storage format first, then create datasets with a CRS that is set once; new layers created inside a dataset inherit it automatically, existing layers are checked against it (with an optional reprojected copy), and a validation report lists any mismatch. GeoPackage and SpatiaLite keep the dataset definitions in two small helper tables inside the file; File Geodatabase uses its real feature datasets (needs GDAL 3.6+).
+version=0.3.0
 author=Belal Mahmoud Abdelmonem
 email=belal.ma7moud@gmail.com
-changelog=0.1.2 - Marked as stable. 0.1.1 - Security scan clean (no Bandit findings). 0.1.0 - First release: create feature datasets, create layers inside a dataset with its CRS, add existing layers with a CRS check (optional reprojected copy), validate datasets.
-tags=geopackage,crs,feature dataset,database
+changelog=0.3.0 - Edit and delete datasets; File Geodatabase dialog now identical to the others; fixed File Geodatabase creation error. 0.2.0 - Renamed to Feature Datasets Manager. Added SpatiaLite and File Geodatabase support and a format chooser. 0.1.3 - Added plugin icon. 0.1.2 - Marked as stable. 0.1.1 - Security scan clean. 0.1.0 - First release.
+tags=geopackage,spatialite,geodatabase,filegdb,crs,feature dataset,database
 category=Database
+icon=icon.png
 experimental=False
 deprecated=False
 repository=https://github.com/belalmahmoud2018/feature-datasets-qgis

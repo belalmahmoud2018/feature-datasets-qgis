@@ -1,35 +1,34 @@
+import os
+
 try:
     from qgis.PyQt.QtGui import QAction  # Qt6
 except ImportError:
     from qgis.PyQt.QtWidgets import QAction  # Qt5
 
-from .dialogs import AddLayerDialog, CreateDatasetDialog, NewLayerDialog, ValidateDialog
+from qgis.PyQt.QtGui import QIcon
 
-MENU = "&Feature Datasets"
+from .dialogs import HubDialog
+
+MENU = "&Feature Datasets Manager"
 
 
 class FeatureDatasetsPlugin:
     def __init__(self, iface):
         self.iface = iface
-        self.actions = []
-
-    def _add(self, text, callback):
-        action = QAction(text, self.iface.mainWindow())
-        action.triggered.connect(lambda _checked=False: callback())
-        self.iface.addPluginToMenu(MENU, action)
-        self.actions.append(action)
+        self.action = None
 
     def initGui(self):
-        self._add("Create Feature Dataset...", lambda: self._open(CreateDatasetDialog))
-        self._add("New Layer in Feature Dataset...", lambda: self._open(NewLayerDialog))
-        self._add("Add Existing Layer to Feature Dataset...", lambda: self._open(AddLayerDialog))
-        self._add("Validate Feature Datasets...", lambda: self._open(ValidateDialog))
+        icon = QIcon(os.path.join(os.path.dirname(__file__), "icon.png"))
+        self.action = QAction(icon, "Feature Datasets Manager...", self.iface.mainWindow())
+        self.action.triggered.connect(lambda _checked=False: self.run())
+        self.iface.addPluginToMenu(MENU, self.action)
+        self.iface.addToolBarIcon(self.action)
 
     def unload(self):
-        for action in self.actions:
-            self.iface.removePluginMenu(MENU, action)
-        self.actions = []
+        if self.action is not None:
+            self.iface.removePluginMenu(MENU, self.action)
+            self.iface.removeToolBarIcon(self.action)
+            self.action = None
 
-    def _open(self, dialog_cls):
-        dlg = dialog_cls(self.iface, self.iface.mainWindow())
-        dlg.exec()
+    def run(self):
+        HubDialog(self.iface, self.iface.mainWindow()).exec()
