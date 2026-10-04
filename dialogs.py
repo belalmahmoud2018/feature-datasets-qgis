@@ -1,5 +1,5 @@
 """Dialogs for the Feature Datasets plugin."""
-import os
+import contextlib
 
 from qgis.core import QgsProject, QgsVectorLayer
 from qgis.gui import QgsProjectionSelectionWidget
@@ -39,9 +39,12 @@ class _GpkgPicker(QHBoxLayout):
 
     def _browse(self):
         if self.allow_new:
+            opt = getattr(QFileDialog, "DontConfirmOverwrite", None)
+            if opt is None:
+                opt = QFileDialog.Option.DontConfirmOverwrite
             path, _ = QFileDialog.getSaveFileName(
                 self.parent_widget, "GeoPackage (existing or new)", self.edit.text(), GPKG_FILTER,
-                options=QFileDialog.DontConfirmOverwrite if hasattr(QFileDialog, "DontConfirmOverwrite") else QFileDialog.Option.DontConfirmOverwrite,
+                options=opt,
             )
         else:
             path, _ = QFileDialog.getOpenFileName(
@@ -136,12 +139,10 @@ class _DatasetMixin:
         self.ds_combo.clear()
         self._datasets = {}
         path = self.picker.path()
-        try:
+        with contextlib.suppress(Exception):
             for d in db.list_datasets(path):
                 self._datasets[d["name"]] = d
                 self.ds_combo.addItem(d["name"])
-        except Exception:
-            pass
         self.ds_combo.blockSignals(False)
         self._dataset_changed()
 
@@ -276,14 +277,12 @@ class AddLayerDialog(QDialog, _DatasetMixin):
         self._tables = {}
         path, dataset = self.picker.path(), self.ds_combo.currentText()
         if dataset and db.is_geopackage(path):
-            try:
+            with contextlib.suppress(Exception):
                 members = set(db.list_members(path, dataset))
                 for t in db.list_tables(path):
                     if t["name"] not in members:
                         self._tables[t["name"]] = t
                         self.table_combo.addItem(t["name"])
-            except Exception:
-                pass
         self.table_combo.blockSignals(False)
         self._check()
 
@@ -373,5 +372,8 @@ class ValidateDialog(QDialog):
             self.out.setPlainText("Error: %s" % e)
             return
         lines.append("")
-        lines.append("Result: %s" % ("all layers match their dataset CRS." if not problems else "%d problem(s) found." % problems))
+        if problems:
+            lines.append("Result: %d problem(s) found." % problems)
+        else:
+            lines.append("Result: all layers match their dataset CRS.")
         self.out.setPlainText("\n".join(lines))

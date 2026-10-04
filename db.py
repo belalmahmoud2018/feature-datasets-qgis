@@ -1,4 +1,5 @@
 """GeoPackage logic for Feature Datasets (no QGIS GUI imports here)."""
+import contextlib
 import os
 import re
 import shutil
@@ -81,17 +82,15 @@ def create_empty_geopackage(path):
 def describe_srs(srs):
     if srs is None:
         return "-"
-    try:
+    with contextlib.suppress(Exception):
         n = srs.GetAuthorityName(None)
         c = srs.GetAuthorityCode(None)
         if n and c:
             return "%s:%s" % (n, c)
-    except Exception:
-        pass
-    try:
-        return srs.GetName() or "unknown"
-    except Exception:
-        return "unknown"
+    name = None
+    with contextlib.suppress(Exception):
+        name = srs.GetName()
+    return name or "unknown"
 
 
 def make_srs(authid, wkt):
@@ -111,27 +110,23 @@ def make_srs(authid, wkt):
             raise DatasetError("Invalid CRS definition: %s" % e)
         if res not in (0, None):
             raise DatasetError("Invalid CRS definition.")
-    try:
+    with contextlib.suppress(Exception):
         srs.SetAxisMappingStrategy(osr.OAMS_TRADITIONAL_GIS_ORDER)
-    except Exception:
-        pass
     return srs
 
 
 def same_crs(a, b):
     if a is None or b is None:
         return a is None and b is None
-    try:
+    with contextlib.suppress(Exception):
         na, ca = a.GetAuthorityName(None), a.GetAuthorityCode(None)
         nb, cb = b.GetAuthorityName(None), b.GetAuthorityCode(None)
         if na and ca and nb and cb:
             return (na.upper(), str(ca)) == (nb.upper(), str(cb))
-    except Exception:
-        pass
-    try:
-        return bool(a.IsSame(b))
-    except Exception:
-        return False
+    same = False
+    with contextlib.suppress(Exception):
+        same = bool(a.IsSame(b))
+    return same
 
 
 # ---------------------------------------------------------------- metadata
@@ -143,14 +138,14 @@ def ensure_meta(path):
     con = _connect(path)
     try:
         con.execute(
-            "CREATE TABLE IF NOT EXISTS %s ("
+            "CREATE TABLE IF NOT EXISTS feature_datasets ("
             "name TEXT PRIMARY KEY, crs_authid TEXT, crs_wkt TEXT NOT NULL, "
-            "description TEXT, created_at TEXT)" % DS_TABLE
+            "description TEXT, created_at TEXT)"
         )
         con.execute(
-            "CREATE TABLE IF NOT EXISTS %s ("
+            "CREATE TABLE IF NOT EXISTS feature_dataset_members ("
             "dataset_name TEXT NOT NULL, table_name TEXT NOT NULL, "
-            "PRIMARY KEY (dataset_name, table_name))" % MEM_TABLE
+            "PRIMARY KEY (dataset_name, table_name))"
         )
         con.commit()
     finally:
@@ -173,7 +168,7 @@ def list_datasets(path):
         if not _has_meta(con):
             return []
         rows = con.execute(
-            "SELECT name, crs_authid, crs_wkt, description FROM %s ORDER BY name" % DS_TABLE
+            "SELECT name, crs_authid, crs_wkt, description FROM feature_datasets ORDER BY name"
         ).fetchall()
     finally:
         con.close()
@@ -203,8 +198,8 @@ def create_dataset(path, name, authid, wkt, description=""):
     con = _connect(path)
     try:
         con.execute(
-            "INSERT INTO %s (name, crs_authid, crs_wkt, description, created_at) "
-            "VALUES (?, ?, ?, ?, ?)" % DS_TABLE,
+            "INSERT INTO feature_datasets (name, crs_authid, crs_wkt, description, created_at) "
+            "VALUES (?, ?, ?, ?, ?)",
             (name, authid or "", wkt, description or "", datetime.now().isoformat(timespec="seconds")),
         )
         con.commit()
@@ -218,7 +213,7 @@ def list_members(path, dataset):
         if not _has_meta(con):
             return []
         rows = con.execute(
-            "SELECT table_name FROM %s WHERE dataset_name=? ORDER BY table_name" % MEM_TABLE,
+            "SELECT table_name FROM feature_dataset_members WHERE dataset_name=? ORDER BY table_name",
             (dataset,),
         ).fetchall()
     finally:
@@ -231,7 +226,7 @@ def all_member_tables(path):
     try:
         if not _has_meta(con):
             return set()
-        rows = con.execute("SELECT table_name FROM %s" % MEM_TABLE).fetchall()
+        rows = con.execute("SELECT table_name FROM feature_dataset_members").fetchall()
     finally:
         con.close()
     return {r[0] for r in rows}
@@ -242,7 +237,7 @@ def add_member(path, dataset, table):
     con = _connect(path)
     try:
         con.execute(
-            "INSERT OR IGNORE INTO %s (dataset_name, table_name) VALUES (?, ?)" % MEM_TABLE,
+            "INSERT OR IGNORE INTO feature_dataset_members (dataset_name, table_name) VALUES (?, ?)",
             (dataset, table),
         )
         con.commit()
@@ -254,7 +249,7 @@ def remove_member(path, dataset, table):
     con = _connect(path)
     try:
         con.execute(
-            "DELETE FROM %s WHERE dataset_name=? AND table_name=?" % MEM_TABLE,
+            "DELETE FROM feature_dataset_members WHERE dataset_name=? AND table_name=?",
             (dataset, table),
         )
         con.commit()

@@ -11,3 +11,5 @@ Menu:    Plugins > Feature Datasets
 The grouping is stored in two helper tables inside the .gpkg
 (feature_datasets, feature_dataset_members). Other software ignores them.
 Close edit mode on the file's layers before creating layers in it.
+
+License: GNU GPL v2 (see LICENSE). Author: Belal Mahmoud Abdelmonem.
