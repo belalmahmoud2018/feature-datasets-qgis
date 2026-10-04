@@ -1,0 +1,6 @@
+0.1.0
+- First release.
+- Create feature datasets (CRS set once) inside a GeoPackage.
+- Create new layers inside a dataset with the dataset CRS.
+- Add existing layers with a CRS check and optional reprojected copy.
+- Validate datasets and report CRS mismatches.
