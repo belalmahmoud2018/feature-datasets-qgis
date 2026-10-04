@@ -1,3 +1,6 @@
+0.1.2
+- Marked as stable (no longer experimental).
+
 0.1.1
 - Removed all Bandit findings (SQL built from constants, no silent try/except).
 
