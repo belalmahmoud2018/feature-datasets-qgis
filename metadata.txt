@@ -1,0 +1,17 @@
+[general]
+name=Feature Datasets for GeoPackage
+qgisMinimumVersion=3.22
+supportsQt6=True
+description=Group GeoPackage layers into Feature Datasets that share one CRS, set once.
+about=Adds a Feature Dataset concept (as in Esri File Geodatabases) to GeoPackage files. A dataset stores its CRS once; new layers created inside it inherit that CRS automatically, existing layers are checked against it. The grouping is stored in two small helper tables inside the .gpkg, which other software ignores.
+version=0.1.0
+author=Belal Mahmoud Abdelmonem
+email=
+tracker=
+repository=
+tags=geopackage,crs,feature dataset,database
+homepage=
+category=Database
+icon=
+experimental=True
+deprecated=False
