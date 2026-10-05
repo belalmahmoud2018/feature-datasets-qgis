@@ -1,3 +1,9 @@
+0.3.2
+- The plugin has its own toolbar with its button, visible by default.
+
+0.3.1
+- Re-release (no code changes).
+
 0.3.0
 - Edit Dataset: rename, change CRS, description; optional reprojection of the dataset's layers (backup first).
 - Delete Dataset: remove the dataset, optionally with its layers.

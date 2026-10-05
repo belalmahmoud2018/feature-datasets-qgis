@@ -10,25 +10,36 @@ from qgis.PyQt.QtGui import QIcon
 from .dialogs import HubDialog
 
 MENU = "&Feature Datasets Manager"
+TOOLBAR = "Feature Datasets Manager"
 
 
 class FeatureDatasetsPlugin:
     def __init__(self, iface):
         self.iface = iface
         self.action = None
+        self.toolbar = None
 
     def initGui(self):
         icon = QIcon(os.path.join(os.path.dirname(__file__), "icon.png"))
         self.action = QAction(icon, "Feature Datasets Manager...", self.iface.mainWindow())
+        self.action.setToolTip(TOOLBAR)
         self.action.triggered.connect(lambda _checked=False: self.run())
         self.iface.addPluginToMenu(MENU, self.action)
-        self.iface.addToolBarIcon(self.action)
+        # its own toolbar, visible by default (the shared Plugins toolbar is often hidden)
+        self.toolbar = self.iface.addToolBar(TOOLBAR)
+        self.toolbar.setObjectName("FeatureDatasetsManagerToolbar")
+        self.toolbar.setToolTip(TOOLBAR)
+        self.toolbar.addAction(self.action)
+        self.toolbar.setVisible(True)
 
     def unload(self):
         if self.action is not None:
             self.iface.removePluginMenu(MENU, self.action)
-            self.iface.removeToolBarIcon(self.action)
-            self.action = None
+        if self.toolbar is not None:
+            self.iface.mainWindow().removeToolBar(self.toolbar)
+            self.toolbar.deleteLater()
+            self.toolbar = None
+        self.action = None
 
     def run(self):
         HubDialog(self.iface, self.iface.mainWindow()).exec()

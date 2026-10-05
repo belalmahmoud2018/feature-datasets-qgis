@@ -1,7 +1,7 @@
-Feature Datasets Manager (v0.3.0)
+Feature Datasets Manager (v0.3.2)
 
 Install: QGIS > Plugins > Manage and Install Plugins > Install from ZIP.
-Open:    Plugins > Feature Datasets Manager (or the toolbar icon).
+Open:    Plugins menu, or the button on the plugin's own toolbar.
 
 1. Choose the storage format: GeoPackage, SpatiaLite or File Geodatabase.
 2. Open an existing file or name a new one.
